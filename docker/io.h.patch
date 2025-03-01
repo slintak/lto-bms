@@ -1,0 +1,33 @@
+--- io.h	2025-03-01 11:55:44.625127518 +0100
++++ io-mod.h	2025-03-01 11:59:23.386021459 +0100
+@@ -600,6 +600,30 @@
+ #  include <avr/ioa8210.h>
+ #elif defined (__AVR_ATA8510__)
+ #  include <avr/ioa8510.h>
++#elif defined(__AVR_ATtiny1624__)
++#  include <avr/iotn1624.h>
++#elif defined(__AVR_ATtiny3226__)
++#  include <avr/iotn3226.h>
++#elif defined(__AVR_ATtiny427__)
++#  include <avr/iotn427.h>
++#elif defined(__AVR_ATtiny1626__)
++#  include <avr/iotn1626.h>
++#elif defined(__AVR_ATtiny3227__)
++#  include <avr/iotn3227.h>
++#elif defined(__AVR_ATtiny824__)
++#  include <avr/iotn824.h>
++#elif defined(__AVR_ATtiny1627__)
++#  include <avr/iotn1627.h>
++#elif defined(__AVR_ATtiny424__)
++#  include <avr/iotn424.h>
++#elif defined(__AVR_ATtiny826__)
++#  include <avr/iotn826.h>
++#elif defined(__AVR_ATtiny3224__)
++#  include <avr/iotn3224.h>
++#elif defined(__AVR_ATtiny426__)
++#  include <avr/iotn426.h>
++#elif defined(__AVR_ATtiny827__)
++#  include <avr/iotn827.h>
+ /* avr1: the following only supported for assembler programs */
+ #elif defined (__AVR_ATtiny28__)
+ #  include <avr/iotn28.h>
