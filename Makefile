@@ -104,7 +104,7 @@ $(TARGET).bin: $(TARGET).elf
 
 $(BUILDDIR)/eeprom.hex: FORCE
 	@if [ -z "$(SN)" ]; then echo "Missing SN variable!"; exit 1; fi
-	python eeprom.py --sn $(SN) $(if $(TO),--temp-offset $(TO)) --file $(BUILDDIR)/eeprom.bin
+	python tools/eeprom.py --sn $(SN) $(if $(TO),--temp-offset $(TO)) --file $(BUILDDIR)/eeprom.bin
 	@objcopy --input-target=binary --output-target=ihex --change-addresses=0x810000 $(BUILDDIR)/eeprom.bin $@
 
 $(BUILDDIR)/%.o: %.c
