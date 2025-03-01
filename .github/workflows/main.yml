@@ -11,11 +11,11 @@ jobs:
         with:
           submodules: 'recursive'
 
-      - name: Build the Firmware
-        run: make
-
       - name: Set Version Variable
         run: echo "FW_VERSION=${GITHUB_REF#refs/*/}" | sed -r 's,/,-,g' >> $GITHUB_ENV
+
+      - name: Build the Firmware
+        run: make FW_VERSION=${{ env.FW_VERSION }}
 
       - name: Save the Firmware Binaries
         uses: actions/upload-artifact@v4

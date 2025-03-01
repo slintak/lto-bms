@@ -24,11 +24,8 @@ OBJDUMP = avr-objdump
 
 BUILDDIR := ./build
 
-# Create FW version number from the latest git tag. If the current project is
-# "dirty" (contains uncommited changes) or is few commits ahead of the tagged
-# commit, mark version of the firmware as development "DEV".
-FW_VERSION := $(shell git describe --always | sed -En -e 's/([0-9]+)\.([0-9]+)-.*/DEV/p' -e t -e 's/^([0-9]+)\.([0-9]+)$$/\1.\2/p' -e t -e 's/.*/0\.0/p')
-
+# Create FW version number from the latest git tag.
+FW_VERSION ?= dev
 TARGET = ./build/main-$(FW_VERSION)
 
 SRC_DIR  := ./ ../config $(sort $(dir $(wildcard ../libs/*/))) $(sort $(dir $(wildcard ../libs/*/*/)))
