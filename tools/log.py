@@ -31,13 +31,14 @@ while True:
     except UnicodeDecodeError:
         continue
 
-    timestamp = time.time_ns()
-    line = f"{rcv} {timestamp}\n"
+    if rcv:
+        timestamp = time.time_ns()
+        line = f"{rcv} {timestamp}\n"
 
-    sys.stdout.write(line)
-    sys.stdout.flush()
+        sys.stdout.write(line)
+        sys.stdout.flush()
 
-    write_api.write(
-        bucket=bucket,
-        record=line,
-    )
+        write_api.write(
+            bucket=bucket,
+            record=line,
+        )
