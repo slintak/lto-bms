@@ -25,7 +25,7 @@
 #define OVLO_MIN_VOLTAGE_DIFFERENCE 50 // mV
 
 // How often to print measurements to stdout. In seconds.
-#define MEASUREMENT_LOG_INTERVAL 1
+#define MEASUREMENT_LOG_INTERVAL 60
 
 
 #define BMS_CHANGE_STATE(ns) do { bms_state = ns; bms_state_transition_timestamp = uptime; } while(0)
