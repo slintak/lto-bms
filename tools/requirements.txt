@@ -1,3 +1,4 @@
+dotenv==0.9.9
 influxdb-client==1.48.0
 pymcuprog==3.17.3.45
 pyserial==3.5
