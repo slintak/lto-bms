@@ -18,16 +18,29 @@
 % also use \includegraphics{}.
 \usepackage{tikz}
 \usepackage{pgfplots}
+\usepgfplotslibrary{groupplots}
 \usepackage{circuitikz}
 \usetikzlibrary{calc}
 
 \usepackage{mhchem}
 
+\usepackage{listings}
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    columns=flexible,
+    keywordstyle=\color{blue},
+    stringstyle=\color{red},
+    commentstyle=\color{green},
+    showstringspaces=false,
+    escapeinside={(*@}{@*)}
+}
+
 % These define global texts that are used in headers and titles.
 \title{1S3P LTO Battery Pack with BMS}
 \author{\textmu{}Art.cz}
 \date{April 2025}
-\revision{Document Revision 1}
+\revision{Document Revision 2}
 \companylogo{logo.pdf}
 
 \begin{document}
@@ -155,15 +168,15 @@ All specifications are in $-40\degree C \leq T_A \leq 60\degree C$ unless otherw
 \begin{tabularx}{\textwidth}{l | c | c c c | c | X}
     \thickhline
     \textbf{Parameter} & \textbf{Symbol} & \textbf{Min.} & \textbf{Typ.} & \textbf{Max.} &
-    \textbf{Unit} & \textbf{Conds.} \\
+    \textbf{Unit} & \textbf{Note} \\
     \hline
     Nominal Capacity & $C_{nom}$ & & 3900 & & mAh & \\
     Capacity at -20\degree{}C & $C_{-20}$ & & $\geq 90\%$ of $C_{nom}$ & & mAh & \\
     Capacity at -40\degree{}C & $C_{-40}$ & & $\geq 50\%$ of $C_{nom}$ & & mAh & \\
-    Cell Voltage\tnote{1} & $V_{cell}$ & 1.5 & 2.4 & 2.8 & V & \\
-    Internal Impedance\tnote{2} & $R_{int}$ & & & 18 & m$\Omega$ & \\
-    Max. Charging Current\tnote{3} & $I_{charge}$ & & & 1.0 & A & 0.26C \\
-    Max. Discharging Current\tnote{3} & $I_{discharge}$ & & & 1.0 & A & 0.26C \\
+    Cell Voltage & $V_{cell}$ & 1.5 & 2.4 & 2.8 & V & \tnote{1} \\
+    Internal Impedance & $R_{int}$ & & & 18 & m$\Omega$ & \tnote{2} \\
+    Charging Current & $I_{charge}$ & & 1.0 & 2.0 & A & \tnote{3} \tnote{4} \\
+    Discharging Current & $I_{discharge}$ & & 1.0 & 2.0 & A & \tnote{3} \tnote{4} \\
     Operating Temperature Range & $T_{oper}$ & -40 & & 60 & \degree{}C & \\
     Weight & $W_{total}$ & & 133 & & g & \\
     Cycle Life ($\geq$ 80\% of nominal capacity) & $N_{cycles}$ & 5000 & & & cycles & \\
@@ -171,8 +184,9 @@ All specifications are in $-40\degree C \leq T_A \leq 60\degree C$ unless otherw
 \end{tabularx}
 \begin{tablenotes}
 \item[1]{Typical $V_{cell}$ value is nominal (average) voltage of one LTO cell.}
-\item[2]{Long term currents are limited by the BMS, not the LTO cells itself.}
-\item[3]{Internal impedance of one LTO cell, not the whole battery pack.}
+\item[2]{Internal impedance of one LTO cell, not the whole battery pack.}
+\item[3]{Typical currents can be continuous and are limited by the BMS, not the LTO cells itself.}
+\item[4]{Maximum currents recommended for $t_{max} = 120 s$.}
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
@@ -180,13 +194,28 @@ All specifications are in $-40\degree C \leq T_A \leq 60\degree C$ unless otherw
 \clearpage
 \section{Detailed Description}
 
-Lithium Titanate Oxide (LTO) batteries are a distinct category within the rechargeable lithium-based battery family, utilizing lithium titanate (\ce{Li4Ti5O12}) as the anode material. This composition gives LTO cells unique characteristics that differentiate them from other lithium-ion chemistries, such as Lithium-Ion (Li-Ion), Lithium Polymer (Li-Po), and Lithium Iron Phosphate (\ce{LiFePO4}, or LFP) batteries.
+Lithium Titanate Oxide (LTO) batteries are a distinct category within the
+rechargeable lithium-based battery family, utilizing lithium titanate
+(\ce{Li4Ti5O12}) as the anode material. This composition gives LTO cells
+unique characteristics that differentiate them from other lithium-ion
+chemistries, such as Lithium-Ion (Li-Ion), Lithium Polymer (Li-Po), and
+Lithium Iron Phosphate (\ce{LiFePO4}, or LFP) batteries.
 
-LTO batteries present a compelling option for applications requiring long cycle life, operation in extreme temperatures, and rapid charging. However, their lower energy density and higher cost may limit their suitability for applications where space and budget are primary concerns.
+LTO batteries present a compelling option for applications requiring long cycle
+life, operation in extreme temperatures, and rapid charging. However, their
+lower energy density and higher cost may limit their suitability for
+applications where space and budget are primary concerns.
 
-An LTO cell typically operates within the voltage ranges shown in Table~\ref{tab:lto-comparison}. These voltage ranges are lower compared to other lithium-based batteries, necessitating appropriate system design considerations when integrating LTO cells into the intended application. They are not and cannot be a drop-in replacement for Li-Ion, Li-Po and other types of batteries and cannot be charged by their charging ICs.
+An LTO cell typically operates within the voltage ranges shown in Table~\ref
+{tab:lto-comparison}. These voltage ranges are lower compared to other
+lithium-based batteries, necessitating appropriate system design considerations
+when integrating LTO cells into the intended application. They are not and
+cannot be a drop-in replacement for Li-Ion, Li-Po and other types of batteries
+and cannot be charged by their charging ICs.
 
-With the parameters in Table~\ref{tab:lto-comparison}, one can see that LTO batteries are a great fit for battery-powered, low-power devices installed outdoors year-round.
+With the parameters in Table~\ref{tab:lto-comparison}, one can see that LTO
+batteries are a great fit for battery-powered, low-power devices installed
+outdoors year-round.
 
 \begin{table}[ht]
 \centering
@@ -228,15 +257,41 @@ Safety & -- & Very High & Medium & High \\
 
 \section{Protection Features}
 
-The Battery Management System (BMS) includes essential protection mechanisms to ensure safe and reliable operation of Lithium Titanate Oxide (LTO) cells. These mechanisms protect against overvoltage (OVLO), undervoltage (UVLO), and overcurrent (OC) conditions. All protection thresholds are fully configurable by writing new values into the EEPROM memory of the BMS's main microcontroller, an \texttt{ATtiny824}.
+The Battery Management System (BMS) includes essential protection mechanisms to
+ensure safe and reliable operation of Lithium Titanate Oxide (LTO) cells. These
+mechanisms protect against overvoltage (OVLO), undervoltage (UVLO), and
+overcurrent (OC) conditions. All protection thresholds are fully configurable
+by writing new values into the EEPROM memory of the BMS's main microcontroller,
+an \texttt{ATtiny824}.
 
-\textbf{Overvoltage protection} ensures that the cell voltage does not exceed a safe upper limit. When the measured voltage on the LTO cells rises above the configured cutoff threshold (\texttt{ovlo\_cutoff}), the BMS disconnects the charging path. Charging is only re-enabled once the voltage falls below the defined release level (\texttt{ovlo\_release}). This protects the cell from overcharging, which could otherwise reduce its lifespan or cause safety hazards.
+\textbf{Overvoltage protection} ensures that the cell voltage does not exceed a
+ safe upper limit. When the measured voltage on the LTO cells rises above the
+ configured cutoff threshold (\texttt{ovlo\_cutoff}), the BMS disconnects the
+ charging path. Charging is only re-enabled once the voltage falls below the
+ defined release level (\texttt{ovlo\_release}). This protects the cell from
+ overcharging, which could otherwise reduce its lifespan or cause safety
+ hazards.
 
-To prevent \textbf{over-discharge} and possible damage to the LTO cells, the BMS continuously monitors the voltage level of the cells and disconnects the load if the voltage drops below the cutoff threshold (\texttt{uvlo\_cutoff}). The load remains disconnected until the voltage recovers above the release threshold (\texttt{uvlo\_release}). This functionality helps preserve battery health and avoids deep discharge scenarios.
+To prevent \textbf{over-discharge} and possible damage to the LTO cells, the BMS
+continuously monitors the voltage level of the cells and disconnects the load
+if the voltage drops below the cutoff threshold (\texttt{uvlo\_cutoff}). The
+load remains disconnected until the voltage recovers above the release
+threshold (\texttt{uvlo\_release}). This functionality helps preserve battery
+health and avoids deep discharge scenarios.
 
-The BMS also includes \textbf{overcurrent protection} on the output. If the current exceeds the \texttt{max\_current} setting (in mA), the output is disabled. The duration of the overcurrent condition is monitored, and if it persists longer than the configured timeout (\texttt{oclo\_timeout}, in milliseconds), the output is turned off to prevent overheating or damage to connected circuitry.
+The BMS also includes \textbf{overcurrent protection} on the output. If the
+current exceeds the \texttt{max\_current} setting (in mA), the output is
+disabled. The duration of the overcurrent condition is monitored, and if it
+persists longer than the configured timeout (\texttt{oclo\_timeout}, in
+milliseconds), the output is turned off to prevent overheating or damage to
+connected circuitry.
 
-All protection parameters can be configured by the user via a Python tool included in the firmware repository. This tool allows writing new settings into the EEPROM of the \texttt{ATtiny824} via UPDI programming interface, enabling customization for different applications, usage scenarios, or safety requirements. Their default parameters are in Table~\ref{tab:bms-protection-config}.
+All protection parameters can be configured by the user via a Python tool
+included in the firmware repository. This tool allows writing new settings into
+the EEPROM of the \texttt{ATtiny824} via UPDI programming interface, enabling
+customization for different applications, usage scenarios, or safety
+requirements. Their default parameters are in Table~\ref
+{tab:bms-protection-config}.
 
 \begin{table}[ht]
 \centering
@@ -247,19 +302,236 @@ All protection parameters can be configured by the user via a Python tool includ
                                   >{\raggedleft\arraybackslash}l}
 \thickhline
 \textbf{Parameter} & \textbf{Description} & \textbf{Default Value} \\
-\thickhline
-\texttt{magic}         & Magic constant used to verify EEPROM integrity & 0x7337 \\
+\hline
 \texttt{serial\_number} & Device serial number & 0 \\
-\texttt{temp\_offset}   & Temperature sensor offset (in \degree{}C) & 0 \\
+\texttt{temp\_offset}   & Temperature sensor offset (\degree{}C) & 0 \\
 \texttt{ovlo\_cutoff}   & Overvoltage cutoff threshold (mV) & 2800 \\
 \texttt{ovlo\_release}  & Overvoltage release threshold (mV) & 2700 \\
 \texttt{uvlo\_release}  & Undervoltage release threshold (mV) & 1800 \\
 \texttt{uvlo\_cutoff}   & Undervoltage cutoff threshold (mV) & 1700 \\
 \texttt{max\_current}   & Maximum output current (mA) & 1000 \\
-\texttt{oclo\_timeout}  & Overcurrent shutdown delay (ms) & 10 \\
-\texttt{crc}            & CRC16, polynomial: 0xa001, initial: 0xffff & \\
+\texttt{oclo\_timeout}  & Overcurrent shutdown delay (s) & 10 \\
 \thickhline
 \end{tabularx}
+\end{table}
+
+\section{Charging}
+
+The charging process of the Lithium Titanate Oxide (LTO) cells is
+straightforward, thanks to the Battery Management System (BMS), which
+implements all necessary safety features. Charging can be done simply by
+connecting a constant voltage source to the load side of the BMS. The
+recommended constant voltage range is 2.7--2.8~V, ensuring the voltage does not
+exceed the maximum cell voltage.
+
+The typical charging process is shown in Figure~\ref{fig:lto-charging}, where
+the constant voltage was set to 2.85~V (slightly above the recommended range to
+show \texttt{OVLO} state in the graph), and the battery's initial state
+was \texttt{UVLO} (Under-Voltage Lockout), i.e., fully discharged. Charging is
+considered complete when the cell voltage if above 1.7~V or when BMS activates
+the \texttt{OVLO} (Over-Voltage Lockout), which indicates the battery is fully
+charged.
+
+As seen in the Figure~\ref{fig:lto-charging}, the cell voltage slowly increases
+from 2.36~V(the voltage immediately after connecting the constant voltage
+source to the load side) up to 2.8~V. At this point, the BMS disconnects the
+cells from the load and activates \texttt{OVLO}.
+
+The charging current is not limited by the constant voltage source, and thus it
+starts at over 1.5 A, gradually decreasing to 0.173 A just before the battery
+is fully charged. The entire 3900 mAh capacity is charged in less than 300
+minutes (5 hours).
+
+This charging procedure is simple and effective, as the BMS handles all the
+necessary protections for the cells. A simple Low Dropout Regulator (LDO) or a
+DC/DC converter can be used to provide the constant voltage for the battery,
+making it easy and cost-effective to integrate into the user's project.
+
+However, this method is still not ideal. Charging the battery with high current
+when deeply discharged can lead to slight degradation of the cells, shortening
+their lifespan and reducing the number of available charge cycles.
+
+A slightly more advanced version of this setup uses an LDO or DC/DC converter
+with a current limiting circuit. In this case, the output voltage is still set
+to 2.7--2.8~V, but the current is limited, for example, to 0.5~A. This limits
+the charging current at the beginning of the process, when the battery is
+deeply discharged and most sensitive to high currents. This approach offers
+better cell protection while maintaining simplicity and low cost.
+
+The best, although more complex and costly, solution is to use a \textit
+{Constant Current / Constant Voltage} (CC/CV) charger specifically designed for
+LTO batteries, such as the CN3795 IC.
+
+
+\begin{figure}[ht]
+    \centering
+    \caption{Charging of deeply discharged LTO battery with BMS by a constant voltage.}
+    \label{fig:lto-charging}
+    \begin{tikzpicture}
+        \sffamily
+        \begin{groupplot}[
+            group style={
+                % set how the plots should be organized
+                group size=1 by 2,
+                % only show ticklabels and axis labels on the bottom
+                x descriptions at=edge bottom,
+                % set the `vertical sep' to zero
+                vertical sep=5pt,
+            },
+            width=\textwidth,
+            height=5cm,
+        ]
+        % Plot for voltage (top plot)
+        \nextgroupplot[
+            ylabel={Voltage},
+            ymode=normal,
+            ytick distance=0.2,
+            xmin=0, xmax=320,
+            ymin=1.7, ymax=2.8,
+            enlarge y limits={abs=0.05},
+            xtick distance=50,
+            yticklabel={\pgfmathprintnumber{\tick}V},
+            xmajorgrids, ymajorgrids
+        ]
+        \addplot [blue] coordinates {
+            (6,1.737)
+            (8,2.36)
+            (9,2.4)
+            (12,2.425)
+            (21,2.445)
+            (37,2.465)
+            (53,2.485)
+            (70,2.505)
+            (90,2.526)
+            (112,2.546)
+            (129,2.567)
+            (143,2.587)
+            (157,2.607)
+            (182,2.628)
+            (217,2.648)
+            (240,2.668)
+            (256,2.688)
+            (269,2.71)
+            (279,2.731)
+            (287,2.752)
+            (295,2.772)
+            (304,2.793)
+            (305,2.800)
+            (310,2.800)
+        };
+
+        % Plot for current (bottom plot)
+        \nextgroupplot[
+            ylabel={Current},
+            ymode=normal,
+            xlabel={Time (min)},
+            ytick distance=0.4,
+            xmin=0, xmax=320,
+            ymin=0, ymax=1.6,
+            enlarge y limits={abs=0.05},
+            xtick distance=50,
+            yticklabel={\pgfmathprintnumber{\tick}A},
+            xmajorgrids, ymajorgrids
+        ]
+        \addplot [red] coordinates {
+            (6,0)
+            (8,1.507)
+            (9,1.383)
+            (12,1.301)
+            (21,1.245)
+            (37,1.193)
+            (53,1.136)
+            (70,1.081)
+            (90,1.022)
+            (112,0.961)
+            (129,0.898)
+            (143,0.836)
+            (157,0.775)
+            (182,0.711)
+            (217,0.646)
+            (240,0.585)
+            (256,0.521)
+            (269,0.448)
+            (279,0.376)
+            (287,0.312)
+            (295,0.243)
+            (304,0.173)
+            (305,0)
+            (310,0)
+        };
+        \end{groupplot}
+    \end{tikzpicture}
+\end{figure}
+
+\section{UART Interface}
+
+The BMS outputs a detailed log containing the internal state and measurements of
+the system every minute (this interval can be configured at compile time in the
+firmware). This log is transmitted via the UART's \texttt{TXD} pin and uses the
+\textbf{InfluxDB Line Protocol}, making it convenient to capture and store the
+ data in an InfluxDB instance.
+
+An example of this log is shown in Listing~\ref{lst:uart-output}, while the meaning
+of each field is summarized in Table~\ref{tab:uart-fields}, and the possible
+values of the \texttt{state} field are listed in Table~\ref{tab:bms-states}.
+
+The UART interface provides a single \texttt{TXD} (transmit) signal and operates
+at a baud rate of 9600. Please note that the BMS does not support receiving
+data via \texttt{RXD}; it only transmits log data. The format of the
+transmitted log is demonstrated in Listing~\ref{lst:uart-output}.
+
+\begin{figure}[!h]
+    \centering
+    \begin{lstlisting}[caption={UART Output Example}, label={lst:uart-output}, linewidth=0.81\textwidth]
+    lto-bms,id=0006
+      uptime=3261420i,v_batt=2768i,v_load=2813i,current=-260i,E_dis=8163i,
+      E_chg=15176i,charge=-2530i,temp=296i,gain=8i,state="BMS_STATE_CHARGING"
+    \end{lstlisting}
+\end{figure}
+
+
+
+\begin{table}[!ht]
+\centering
+\caption{UART Log Fields Description}
+\begin{tabularx}{\textwidth}{l|l|X}
+\thickhline
+\textbf{Field} & \textbf{Unit} & \textbf{Description} \\
+\hline
+\texttt{uptime}     & s        & Number of seconds since the last restart. \\
+\texttt{v\_batt}    & mV       & Battery voltage. \\
+\texttt{v\_load}    & mV       & Voltage present at the load side of the BMS. \\
+\texttt{current}    & mA       & Current through the shunt resistor. Negative values indicate charging. \\
+\texttt{E\_dis}     & Wh       & Energy discharged from the battery. \\
+\texttt{E\_chg}     & Wh       & Energy charged into the battery. \\
+\texttt{charge}     & Ah       & Total amount of charge in the battery. \\
+\texttt{temp}       & K        & Internal temperature sensor reading. \\
+\texttt{gain}       & –        & ADC gain setting for current measurement. \\
+\texttt{state}      & –        & Internal BMS state. See Table~\ref{tab:bms-states}. \\
+\thickhline
+\end{tabularx}
+\label{tab:uart-fields}
+\end{table}
+
+\begin{table}[!ht]
+\centering
+\caption{Possible BMS States in the UART Log}
+\begin{tabularx}{\textwidth}{l|X}
+\thickhline
+\textbf{State} & \textbf{Description} \\
+\hline
+\texttt{BMS\_STATE\_INVALID}      & Invalid state. \\
+\texttt{BMS\_STATE\_UVLO}         & Under-voltage lockout. \\
+\texttt{BMS\_STATE\_OVLO}         & Over-voltage lockout. \\
+\texttt{BMS\_STATE\_OVLO\_ACTIVE} & Over-voltage lockout active. \\
+\texttt{BMS\_STATE\_OCLO}         & Over-current lockout. \\
+\texttt{BMS\_STATE\_CHARGING}     & Charging. \\
+\texttt{BMS\_STATE\_DISCHARGING}  & Discharging. \\
+\texttt{BMS\_STATE\_IDLE}         & Idle. \\
+\texttt{BMS\_STATE\_ERR}          & Error state. \\
+\thickhline
+\end{tabularx}
+\label{tab:bms-states}
 \end{table}
 
 \section{I\textsuperscript{2}C Interface}
@@ -288,7 +560,7 @@ is a summary of the available registers.
     \textbf{Address} & \textbf{Register Name} & \multicolumn{1}{c |}{\textbf{Function}} & \multicolumn{2}{c|}{\textbf{Power-on reset}} & \textbf{Type}\tnote{1} \\
     \cline{4-5}
     & & & Binary & Hex & \\
-    \thickhline
+    \hline
     0x00 & Configuration Register\tnote{2} & All-register reset, shunt voltage and bus voltage ADC conversion times and averaging, operating mode. & 01100001 00100111 & 0x6127 & $R/\overline{W}$ \\ 
     0x01 & Current Register & Contains the value of the current flowing through the shunt resistor. & 00000000 00000000 & 0x0000 & R \\
     0x02 & Voltage Register & Voltage of the battery cell. & 00000000 00000000 & 0x0000 & R \\
@@ -335,7 +607,7 @@ when the current is negative.
 \textbf{Register Name} & \textbf{Address} & \textbf{LSB} & \multicolumn{2}{c|}{\textbf{Example}} & \textbf{Note} \\
 \cline{4-5}
 & & & \textbf{Integer Value} & \textbf{Result} & \\ 
-\thickhline
+\hline
 Current Register & 0x01 & 1.25 mA & 0x02F8 & 0.95 A & \\
 Voltage Register & 0x02 & 1.25 mV & 0x0898 & 2.75 V & \\
 Power Register & 0x03 & 1.25 mW & 0x082A & 2.6125 W & \\
@@ -367,19 +639,28 @@ optimized. There are still many areas in the code that can be optimized.
                 width=7cm,
                 xlabel={Cell Voltage [$V$]},
                 xtick distance=0.4,
-                ytick distance=50,
+                ytick distance=10,
                 xticklabel={\pgfmathprintnumber{\tick}$V$},
                 yticklabel={\pgfmathprintnumber{\tick}$\mu{}A$},
                 xmajorgrids, ymajorgrids]
             \addplot[smooth,mark=*] plot coordinates {
-                (1.40, 290)
-                (1.80, 235)
-                (2.45, 55)
-                (2.80, 50)
+                (1.60, 88)
+                (1.70, 83)
+                (1.80, 79)
+                (1.90, 74)
+                (2.00, 70)
+                (2.10, 66)
+                (2.20, 63)
+                (2.30, 59)
+                (2.40, 56)
+                (2.50, 54)
+                (2.60, 52)
+                (2.70, 49)
+                (2.80, 47)
             };
             \end{axis}
         \end{tikzpicture}
-        \caption{Approximate self-consumption vs. battery voltage}
+        \caption{Average self-consumption vs. battery voltage}
         \label{fig:self-consumption}
     \end{minipage}%
     \hfill
