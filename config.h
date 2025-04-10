@@ -37,7 +37,6 @@ typedef enum {
     BMS_STATE_INVALID,
     BMS_STATE_UVLO,    // Under-voltage lockout
     BMS_STATE_OVLO,    // Over-voltage lockout
-    BMS_STATE_OVLO_ACTIVE,
     BMS_STATE_OCLO,    // Over-current lockout
     BMS_STATE_CHARGING,
     BMS_STATE_DISCHARGING,
