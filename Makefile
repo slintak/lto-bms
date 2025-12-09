@@ -69,9 +69,6 @@ clean:
 dirs:
 	mkdir -p $(BUILDDIR)
 
-datasheet: ./datasheet/datasheet.tex
-	latexmk -cd -f -jobname=lto-bms-datasheet -outdir=$(BUILDDIR) -auxdir=$(BUILDDIR) -interaction=batchmode -pdf $<
-
 release: all
 	@cp $(TARGET).bin $(CNF)-$(FW_VERSION).bin
 	@cp $(TARGET).hex $(CNF)-$(FW_VERSION).hex
