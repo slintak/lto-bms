@@ -4,7 +4,7 @@ jobs:
   build-firmware:
     runs-on: ubuntu-latest
     container:
-            image: vlastik/avr-gcc:latest
+            image: ghcr.io/slintak/avr-gcc:latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
