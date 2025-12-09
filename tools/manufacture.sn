@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# Check if firmware file path is provided
+if [[ -z "$1" ]]; then
+    echo "Usage: $0 /path/to/firmware.hex"
+    exit 1
+fi
+
+FW_PATH="$1"
+
+# Check if firmware file exists
+if [[ ! -f "$FW_PATH" ]]; then
+    echo "Error: Firmware file '$FW_PATH' does not exist."
+    exit 1
+fi
+
+# Set path to the Makefile's directory (one level up from script location)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+MAKE_DIR="$(dirname "$SCRIPT_DIR")"
+
+echo "=== PCB Programming Script ==="
+echo "Firmware to flash: $FW_PATH"
+read -p "Enter starting serial number: " SN
+
+while true; do
+    echo "----------------------------------"
+    echo "Ready to program PCB with SN=$SN"
+    read -p "Press [Enter] to program, or [r] to retry previous SN: " INPUT
+
+    if [[ "$INPUT" == "r" || "$INPUT" == "R" ]]; then
+        echo "Retrying PCB with SN=$SN..."
+    else
+        echo "Programming PCB with SN=$SN..."
+    fi
+
+    # Run the programming commands in parent directory
+    if make -C "$MAKE_DIR" fuses flash FW_FILE="$FW_PATH" && make -C "$MAKE_DIR" eeprom SN=$SN; then
+        echo "✅ PCB with SN=$SN programmed successfully."
+        if [[ "$INPUT" != "r" && "$INPUT" != "R" ]]; then
+            ((SN++))  # Increment SN only if it was not a retry
+        fi
+    else
+        echo "❌ Programming failed for SN=$SN."
+        echo "You can press [r] to retry or [Enter] to try again anyway."
+    fi
+done
