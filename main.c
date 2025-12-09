@@ -77,7 +77,7 @@ void RTC_stop(void) {
 
 void PORT_init(void) {
     BMS_CUTOFF_ON();
-    // BMS_CUTOFF_3V3_ON();
+    BMS_CUTOFF_3V3_ON();
 
     // When debug (UART) is needed.
     PORTB.DIR |= BMS_UART_TX;
@@ -129,7 +129,7 @@ int main(void) {
 
     // Turn on cutoff (turn off voltage on the ouput)
     BMS_CUTOFF_ON();
-    // BMS_CUTOFF_3V3_ON();
+    BMS_CUTOFF_3V3_ON();
 
     eeprom_config_init(&bms_config);
     BMS_CHANGE_STATE(BMS_STATE_IDLE);
@@ -177,7 +177,7 @@ int main(void) {
                 BMS_CHANGE_STATE(BMS_STATE_OCLO);
             } else {
                 BMS_CUTOFF_OFF();
-                // BMS_CUTOFF_3V3_OFF();
+                BMS_CUTOFF_3V3_OFF();
                 if(current > 0) {
                     BMS_CHANGE_STATE(BMS_STATE_DISCHARGING);
                 } else if(current < 0) {
@@ -200,10 +200,10 @@ int main(void) {
                 int32_t vdiff = (int32_t)load - battery;
                 if(vdiff > UVLO_MIN_VOLTAGE_DIFFERENCE) {
                     BMS_CUTOFF_OFF();
-                    // BMS_CUTOFF_3V3_OFF();
+                    BMS_CUTOFF_3V3_OFF();
                 } else {
                     BMS_CUTOFF_ON();
-                    // BMS_CUTOFF_3V3_ON();
+                    BMS_CUTOFF_3V3_ON();
                 }
             }
             break;
@@ -220,8 +220,11 @@ int main(void) {
                 int32_t vdiff = (int32_t)battery - load;
                 if(vdiff > OVLO_MIN_VOLTAGE_DIFFERENCE) {
                     BMS_CUTOFF_OFF();
+                    BMS_CUTOFF_3V3_OFF();
                 } else if(vdiff < -5) {
                     BMS_CUTOFF_ON();
+                    // Keep 3.3V output on, discharging is OK while in OVLO.
+                    BMS_CUTOFF_3V3_OFF();
                 }
             }
             break;
@@ -230,9 +233,11 @@ int main(void) {
             // Release the over-current event only after a specified time period.
             if((uptime - bms_state_transition_timestamp) > bms_config.oclo_timeout) {
                 BMS_CUTOFF_OFF();
+                BMS_CUTOFF_3V3_OFF();
                 BMS_CHANGE_STATE(BMS_STATE_IDLE);
             } else {
                 BMS_CUTOFF_ON();
+                BMS_CUTOFF_3V3_ON();
             }
         break;
 
@@ -280,6 +285,7 @@ main_continue:
 
 main_error:
     BMS_CUTOFF_ON();
+    BMS_CUTOFF_3V3_ON();
     DEBUG("Main loop finished!\n");
     while(1) {
         _delay_ms(1000);

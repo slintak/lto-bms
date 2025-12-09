@@ -48,7 +48,6 @@ static const char bms_state_str[BMS_STATE_ERR+1][22] = {
     "BMS_STATE_INVALID",
     "BMS_STATE_UVLO",    // Under-voltage lockout
     "BMS_STATE_OVLO",    // Over-voltage lockout
-    "BMS_STATE_OVLO_AC",
     "BMS_STATE_OCLO",    // Over-current lockout
     "BMS_STATE_CHARGING",
     "BMS_STATE_DISCHARGING",

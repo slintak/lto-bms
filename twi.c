@@ -48,7 +48,7 @@ ISR(TWI0_TWIS_vect) {
             TWI0.SCTRLB = TWI_ACKACT_NACK_gc | TWI_SCMD_COMPTRANS_gc;
         }
     } else {
-        volatile uint8_t capture = TWI0.SSTATUS;
+        volatile uint8_t capture __attribute__((unused)) = TWI0.SSTATUS;
         asm("NOP");
     }
 }

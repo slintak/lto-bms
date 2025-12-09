@@ -11,7 +11,7 @@ CLOCK = 1250000
 #------
 # Tools
 #------
-PYMCUPROG_WRITE = pymcuprog write -t uart -u /dev/ttyUSB1 -d $(DEVICE) -c 125k
+PYMCUPROG_WRITE = pymcuprog write -t uart -u /dev/ttyUSB0 -d $(DEVICE) -c 125k
 
 CC = avr-gcc
 OBJCOPY = avr-objcopy
@@ -74,8 +74,15 @@ release: all
 	@cp $(TARGET).hex $(CNF)-$(FW_VERSION).hex
 	@cp $(TARGET).elf $(CNF)-$(FW_VERSION).elf
 
-flash:	all
+flash:
+ifeq ($(FW_FILE),)
+	$(MAKE) all
 	$(PYMCUPROG_WRITE) -f $(TARGET).hex --erase
+else
+	@echo "Flashing provided firmware: $(FW_FILE)"
+	$(PYMCUPROG_WRITE) -f $(FW_FILE) --erase
+endif
+
 
 fuses: fuses.hex
 	$(PYMCUPROG_WRITE) -f $<
