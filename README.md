@@ -62,7 +62,7 @@ Ubuntu OS, so the following commands should work on any Debian-based system.
 
 ```
 sudo apt update
-sudo apt install -y avr-gcc python3-pip
+sudo apt install -y gcc-avr python3-pip
 
 # Installing Python packages in a virtual environment is recommended.
 pip3 install -r requirements.txt
