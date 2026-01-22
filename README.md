@@ -1,7 +1,8 @@
-# LTO Battery Management System (BMS)
+# LTO / Na-ion Battery Management System (BMS)
 
 This project is an open-source Battery Management System (BMS) designed for a 1S
-Lithium Titanate (LTO) battery pack. It is intended for low-power applications,
+Lithium Titanate (LTO) battery pack, with experimental support for 1S Sodium-ion
+(Na-ion) cells. It is intended for low-power applications,
 specifically the [Meshtastic project](https://meshtastic.org), where expected
 discharge currents are in the tens of milliamps, and charging is usually
 handled by a solar panel with MPPT, reaching up to several hundred milliamps.
@@ -35,7 +36,8 @@ continuously measures the cell parameters and communicates them over I2C.
 
 ## Features
 
-- Supports 1S LTO battery configuration.
+- Supports 1S LTO battery configuration (tested and stable).
+- Supports 1S Na-ion battery configuration (experimental; needs more testing).
 - Under-voltage (UVLO) protection.
 - Over-voltage (OVLO) protection.
 - Over-current (OCLO) protection.
@@ -75,6 +77,17 @@ make
 # Or with enabled debug logging
 make DEBUG=1
 ```
+
+By default, `make` builds both chemistries (LTO and NAION). To build or flash a
+single chemistry, set `CHEMISTRY`:
+
+```
+make CHEMISTRY=LTO
+make CHEMISTRY=NAION
+make flash CHEMISTRY=NAION
+```
+
+Note: Na-ion support is experimental and requires more validation on hardware.
 
 The microcontroller can be programmed using `pymcuprog` with a USB-UART
 converter. The RX and TX lines of the converter should be connected via a 1kΩ
