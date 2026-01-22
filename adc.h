@@ -6,8 +6,17 @@
 
 #define SHUNT_RESISTOR   (0.1) // Ohm
 #define VOLTAGE_DIVIDER  (0.5/1.5)
-#define ADC_CURRENT_CONSTANT ((1024.0 / SHUNT_RESISTOR)/(8192))
-#define ADC_VOLTAGE_CONSTANT (1024/(VOLTAGE_DIVIDER*16384))
+
+#if defined(CELL_NAION)
+#define ADC_REF_MV 2048.0
+#elif defined(CELL_LTO)
+#define ADC_REF_MV 1024.0
+#else
+#error "CELL_LTO or CELL_NAION must be defined"
+#endif
+
+#define ADC_CURRENT_CONSTANT ((ADC_REF_MV / SHUNT_RESISTOR) / 8192.0)
+#define ADC_VOLTAGE_CONSTANT (ADC_REF_MV / (VOLTAGE_DIVIDER * 16384.0))
 #define ADC_TO_VOLTAGE(a) (uint32_t)((float)(a) * (ADC_VOLTAGE_CONSTANT))
 #define ADC_TO_CURRENT(a) (int32_t)((float)(a) * (ADC_CURRENT_CONSTANT))
 

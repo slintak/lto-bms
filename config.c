@@ -8,6 +8,25 @@
 
 // bms_eeprom_config_t EEMEM *bms_config_eeprom;
 
+#if defined(CELL_NAION)
+/**
+ *  Na-ion 1S
+ */
+static bms_eeprom_config_t bms_config_default = {
+    .magic = CONFIG_MAGIC_CONSTANT,
+    .serial_number = 0,
+    .temp_offset = 0,
+    .ovlo_cutoff  = 3900,
+    .ovlo_release = 3800,
+    .uvlo_release = 2200,
+    .uvlo_cutoff  = 2000,
+    .max_current = 1000,
+    .oclo_timeout = 10
+};
+#elif defined(CELL_LTO)
+/**
+ *  LTO 1S
+ */
 static bms_eeprom_config_t bms_config_default = {
     .magic = CONFIG_MAGIC_CONSTANT,
     .serial_number = 0,
@@ -19,6 +38,9 @@ static bms_eeprom_config_t bms_config_default = {
     .max_current = 1000,
     .oclo_timeout = 10
 };
+#else
+#error "CELL_LTO or CELL_NAION must be defined"
+#endif
 
 void eeprom_config_init(bms_eeprom_config_t *cnf) {
     if(!eeprom_config_load(cnf)) {

@@ -14,6 +14,14 @@
 #define ADC_SAMPLE_NUM       ADC_SAMPNUM_ACC16_gc
 #define ADC_PGA_GAIN(g)      ADC0.PGACTRL = ((g << 5) | ADC_PGABIASSEL_1_4X_gc | ADC_PGAEN_bm)
 
+#if defined(CELL_NAION)
+#define ADC_REFSEL_BMS ADC_REFSEL_2048MV_gc
+#elif defined(CELL_LTO)
+#define ADC_REFSEL_BMS ADC_REFSEL_1024MV_gc
+#else
+#error "CELL_LTO or CELL_NAION must be defined"
+#endif
+
 static adc_gain_e adc_gain = ADC_GAIN_16X;
 
 const static adc_channels_t adc_channels[ADC_CHANNELS_NUM] = {
@@ -58,7 +66,7 @@ void adc_init(void) {
     ADC0.CTRLA = 1 << ADC_ENABLE_bp    // ADC Enable: enabled
                | 1 << ADC_RUNSTDBY_bp;  // Run standby mode: enabled
     ADC0.CTRLB = ADC_PRESC_DIV2_gc;    // CLK_ADC = CLK_PER / PRESCALER
-    ADC0.CTRLC = ADC_REFSEL_1024MV_gc | (ADC_TIMEBASE_VALUE << ADC_TIMEBASE_gp);
+    ADC0.CTRLC = ADC_REFSEL_BMS | (ADC_TIMEBASE_VALUE << ADC_TIMEBASE_gp);
     ADC0.CTRLE = ADC_SAMPLE_DURATION;
     ADC0.CTRLF = ADC_SAMPLE_NUM;
     ADC_PGA_GAIN(adc_gain); // Enable the gain amplifier. Will be used only for some measurements.

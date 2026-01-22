@@ -6,6 +6,14 @@
 
 #define CONFIG_MAGIC_CONSTANT 0x7337
 
+#if defined(CELL_NAION)
+#define BMS_LOG_TAG "nai-bms"
+#elif defined(CELL_LTO)
+#define BMS_LOG_TAG "lto-bms"
+#else
+#error "CELL_LTO or CELL_NAION must be defined"
+#endif
+
 /**
  * This structure represents the data stored in the EEPROM.
  * EEPROM size for ATtiny824 is 128 B.

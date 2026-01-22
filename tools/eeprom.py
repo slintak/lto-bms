@@ -35,7 +35,9 @@ def validator_int16(astring):
 
 
 MAGIC_NUMBER = 0x7337
-DEFAULTS = {
+CHEMISTRY_CHOICES = ['LTO', 'NAION']
+
+DEFAULTS_LTO = {
     'sn': {
         'value': 0x0000,
         'required': True,
@@ -70,6 +72,31 @@ DEFAULTS = {
         'value': 10,  # seconds
         'help': 'Time to hold over-current lockout. Unit: seconds.',
     },
+}
+
+DEFAULTS_NAION = {
+    **DEFAULTS_LTO,
+    'ovlo-cutoff': {
+        'value': 3900,  # mV
+        'help': 'Over-voltage cutoff. Unit: mV.',
+    },
+    'ovlo-release': {
+        'value': 3800,  # mV
+        'help': 'Over-voltage release. Unit: mV.',
+    },
+    'uvlo-release': {
+        'value': 2200,  # mV
+        'help': 'Under-voltage release. Unit: mV.',
+    },
+    'uvlo-cutoff': {
+        'value': 2000,  # mV
+        'help': 'Under-voltage cutoff. Unit: mV.',
+    },
+}
+
+DEFAULTS_BY_CHEMISTRY = {
+    'LTO': DEFAULTS_LTO,
+    'NAION': DEFAULTS_NAION,
 }
 
 
@@ -109,8 +136,24 @@ def crc16(data):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='EEPROM configuration generator for LTO-BMS firmware.')
-    make_args(parser, DEFAULTS)
+    base_parser = argparse.ArgumentParser(add_help=False)
+    base_parser.add_argument(
+        '--chemistry',
+        choices=CHEMISTRY_CHOICES,
+        default='LTO',
+        help='Battery chemistry preset (affects default limits).',
+    )
+    base_args, _ = base_parser.parse_known_args()
+    defaults = DEFAULTS_BY_CHEMISTRY[base_args.chemistry]
+
+    parser = argparse.ArgumentParser(description='EEPROM configuration generator for LTO/NAION-BMS firmware.')
+    parser.add_argument(
+        '--chemistry',
+        choices=CHEMISTRY_CHOICES,
+        default=base_args.chemistry,
+        help='Battery chemistry preset (affects default limits).',
+    )
+    make_args(parser, defaults)
     parser.add_argument(
         '-f', '--file',
         type=str,

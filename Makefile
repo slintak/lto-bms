@@ -20,17 +20,26 @@ OBJDUMP = avr-objdump
 
 #------------------------------------------------------------------------------
 #----------------------------------------- no user serviceable parts inside ---
-.PHONY: all clean flash eeprom flash_isp dirs
+.PHONY: all all-chem all-one all-LTO all-NAION clean flash eeprom flash_isp dirs
 
-BUILDDIR := ./build
+OUTDIR := ./build
 
 # Create FW version number from the latest git tag.
 FW_VERSION ?= dev
-TARGET = ./build/main-$(FW_VERSION)
+CHEMISTRY ?= LTO
+
+ifeq ($(filter $(CHEMISTRY),LTO NAION),)
+$(error CHEMISTRY must be LTO or NAION)
+endif
+
+OBJDIR := $(OUTDIR)/obj-$(CHEMISTRY)-$(FW_VERSION)
+TARGET = $(OUTDIR)/main-$(CHEMISTRY)-$(FW_VERSION)
+EEPROM_BIN = $(OUTDIR)/eeprom-$(CHEMISTRY)-$(FW_VERSION).bin
+EEPROM_HEX = $(OUTDIR)/eeprom-$(CHEMISTRY)-$(FW_VERSION).hex
 
 SRC_DIR  := ./ ../config $(sort $(dir $(wildcard ../libs/*/))) $(sort $(dir $(wildcard ../libs/*/*/)))
 SOURCES  := $(foreach sdir,$(SRC_DIR),$(wildcard $(sdir)*.c))
-OBJECTS  := $(addprefix $(BUILDDIR)/,$(notdir $(SOURCES:.c=.o)))
+OBJECTS  := $(addprefix $(OBJDIR)/,$(notdir $(SOURCES:.c=.o)))
 INCLUDES  := -I. $(addprefix -I,$(SRC_DIR))
 
 LDFLAGS += -Wl,--relax
@@ -40,6 +49,7 @@ CFLAGS += -Os
 CFLAGS += -mmcu=$(DEVICE)
 CFLAGS += -DF_CPU=$(CLOCK) $(if $(DEBUG),-DDEBUG_ENABLE)
 CFLAGS += -DFW_VERSION=\"$(FW_VERSION)\"
+CFLAGS += -DCELL_$(CHEMISTRY)
 CFLAGS += -Wall
 CFLAGS += -Winline
 CFLAGS += -Wstrict-prototypes
@@ -50,7 +60,17 @@ CFLAGS += -funsigned-char
 CFLAGS += -fdiagnostics-color=always
 
 # default target
-all: dirs hex bin
+all: all-chem
+
+all-chem: all-LTO all-NAION
+
+all-LTO:
+	$(MAKE) all-one CHEMISTRY=LTO FW_VERSION=$(FW_VERSION)
+
+all-NAION:
+	$(MAKE) all-one CHEMISTRY=NAION FW_VERSION=$(FW_VERSION)
+
+all-one: dirs hex bin
 
 help:
 	@echo
@@ -64,10 +84,10 @@ help:
 	@echo  make clean ................. clean all
 
 clean:
-	rm -rf $(BUILDDIR)
+	rm -rf $(OUTDIR)
 
 dirs:
-	mkdir -p $(BUILDDIR)
+	mkdir -p $(OUTDIR) $(OBJDIR)
 
 release: all
 	@cp $(TARGET).bin $(CNF)-$(FW_VERSION).bin
@@ -76,7 +96,7 @@ release: all
 
 flash:
 ifeq ($(FW_FILE),)
-	$(MAKE) all
+	$(MAKE) all-one
 	$(PYMCUPROG_WRITE) -f $(TARGET).hex --erase
 else
 	@echo "Flashing provided firmware: $(FW_FILE)"
@@ -87,7 +107,7 @@ endif
 fuses: fuses.hex
 	$(PYMCUPROG_WRITE) -f $<
 
-eeprom: $(BUILDDIR)/eeprom.hex
+eeprom: $(EEPROM_HEX)
 	$(PYMCUPROG_WRITE) -f $<
 
 hex: $(TARGET).hex
@@ -106,18 +126,18 @@ $(TARGET).hex: $(TARGET).elf
 $(TARGET).bin: $(TARGET).elf
 	$(OBJCOPY) -R eeprom -O binary $(TARGET).elf $(TARGET).bin
 
-$(BUILDDIR)/eeprom.hex: FORCE
+$(EEPROM_HEX): FORCE
 	@if [ -z "$(SN)" ]; then echo "Missing SN variable!"; exit 1; fi
-	python tools/eeprom.py --sn $(SN) $(if $(TO),--temp-offset $(TO)) --file $(BUILDDIR)/eeprom.bin
-	@objcopy --input-target=binary --output-target=ihex --change-addresses=0x810000 $(BUILDDIR)/eeprom.bin $@
+	python tools/eeprom.py --chemistry $(CHEMISTRY) --sn $(SN) $(if $(TO),--temp-offset $(TO)) --file $(EEPROM_BIN)
+	@objcopy --input-target=binary --output-target=ihex --change-addresses=0x810000 $(EEPROM_BIN) $@
 
-$(BUILDDIR)/%.o: %.c
+$(OBJDIR)/%.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-$(BUILDDIR)/%.o: ../libs/*/%.c
+$(OBJDIR)/%.o: ../libs/*/%.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-$(BUILDDIR)/%.o: ../libs/*/*/%.c
+$(OBJDIR)/%.o: ../libs/*/*/%.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 size: dirs $(TARGET).elf

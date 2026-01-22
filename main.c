@@ -254,7 +254,7 @@ int main(void) {
         twi_registers->ina260.power = HTONS((uint16_t)((abs(current) * battery) / 10000));
 
         if(uptime >= next_log_message) {
-            LOG("lto-bms,id=%04X uptime=%lui,v_batt=%lui,v_load=%lui,current=%ldi,",
+            LOG(BMS_LOG_TAG ",id=%04X uptime=%lui,v_batt=%lui,v_load=%lui,current=%ldi,",
                 bms_config.serial_number,
                 uptime,
                 battery,
