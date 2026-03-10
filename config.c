@@ -12,10 +12,10 @@ static bms_eeprom_config_t bms_config_default = {
     .magic = CONFIG_MAGIC_CONSTANT,
     .serial_number = 0,
     .temp_offset = 0,
-    .ovlo_cutoff = 2800,
-    .ovlo_release = 2700,
-    .uvlo_release = 1800,
-    .uvlo_cutoff = 1700,
+    .ovlo_cutoff = 2850,
+    .ovlo_release = 2750,
+    .uvlo_release = 1900,
+    .uvlo_cutoff = 1800,
     .max_current = 1000,
     .oclo_timeout = 10
 };

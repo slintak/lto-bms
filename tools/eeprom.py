@@ -47,19 +47,19 @@ DEFAULTS = {
         'help': 'Temperature offset for the internal sensor.',
     },
     'ovlo-cutoff': {
-        'value': 2800,  # mV
+        'value': 2850,  # mV
         'help': 'Over-voltage cutoff. Unit: mV.',
     },
     'ovlo-release': {
-        'value': 2700,  # mV
+        'value': 2750,  # mV
         'help': 'Over-voltage release. Unit: mV.',
     },
     'uvlo-release': {
-        'value': 1800,  # mV
+        'value': 1900,  # mV
         'help': 'Under-voltage release. Unit: mV.',
     },
     'uvlo-cutoff': {
-        'value': 1700,  # mV
+        'value': 1800,  # mV
         'help': 'Under-voltage cutoff. Unit: mV.',
     },
     'max-current': {
